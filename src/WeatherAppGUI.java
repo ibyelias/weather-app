@@ -17,6 +17,7 @@ public class WeatherAppGUI extends JFrame {
     private Color lightText = Color.BLACK;
     private Color darkBackground = Color.DARK_GRAY;
     private Color darkText = Color.LIGHT_GRAY;
+    private boolean isCelcius = false; // Celcius or Fahrenheit
 
     public WeatherAppGUI() {
         super("Weather App");
@@ -38,7 +39,7 @@ public class WeatherAppGUI extends JFrame {
         weatherConditionImage.setBounds(0, 125, 450, 217);
         add(weatherConditionImage);
 
-        JLabel temperatureText = new JLabel("10 F");
+        JLabel temperatureText = new JLabel("10");
         temperatureText.setBounds(0, 350, 450, 54);
         temperatureText.setFont(new Font("Dialog", Font.BOLD, 48));
         temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -113,7 +114,7 @@ public class WeatherAppGUI extends JFrame {
                 }
 
                 double temperature = (double) weatherData.get("temperature");
-                temperatureText.setText(temperature + " F");
+                temperatureText.setText(temperature + " ");
                 weatherConditionDesc.setText(weatherCondition);
 
                 long humidity = (long) weatherData.get("humidity");
@@ -137,6 +138,42 @@ public class WeatherAppGUI extends JFrame {
         add(modeToggleButton);
 
         applyTheme(); // Set the initial theme based on isDarkMode
+
+        JButton temperatureButton = new JButton("°F");
+        temperatureButton.setBounds(275, 350, 50, 50);
+        temperatureButton.setFont(new Font("Dialog", Font.PLAIN, 12));
+
+        ActionListener temperatureAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String userInput = searchTextField.getText().trim();
+                if (userInput.isEmpty()) {
+                    return;
+                }
+
+                weatherData = WeatherApp.getWeatherData(userInput);
+                if (weatherData == null) {
+                    cityNameLabel.setText("City not found");
+                    return;
+                }
+
+                isCelcius = !isCelcius; // Toggle the unit
+                double temperature = (double) weatherData.get("temperature");
+
+                if (!isCelcius) {
+                    temperatureText.setText(temperature + " ");
+                    temperatureButton.setText("°F");
+                } else {
+                    // Convert to Celsius
+                    double temperatureInCelcius = (temperature - 32) * 5 / 9;
+                    temperatureText.setText(String.format("%.1f", temperatureInCelcius));
+                    temperatureButton.setText("°C");
+                }
+            }
+        };
+
+        temperatureButton.addActionListener(temperatureAction);
+        add(temperatureButton);
     }
 
     private void toggleDarkMode() {
