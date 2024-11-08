@@ -69,6 +69,12 @@ public class WeatherAppGUI extends JFrame {
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(windspeedText);
 
+        JLabel dateText = new JLabel("<html><b>Date:</b> </html>");
+        dateText.setBounds(0, 70, 450, 75);
+        dateText.setFont(new Font("Dialog", Font.PLAIN, 16));
+        dateText.setHorizontalAlignment(SwingConstants.CENTER);
+        add(dateText);
+
         // Initialize the city name label and add it to the frame
         cityNameLabel = new JLabel("");
         cityNameLabel.setBounds(0, 70, 450, 30);
@@ -122,6 +128,9 @@ public class WeatherAppGUI extends JFrame {
 
                 double windspeed = (double) weatherData.get("windspeed");
                 windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
+
+                String date = (String) weatherData.get("time");
+                dateText.setText("<html><b>Date:</b> " + date + "</html>");
             }
         };
         //Adds search functionality to button and by also hitting enter

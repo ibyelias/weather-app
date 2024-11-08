@@ -62,8 +62,18 @@ public class WeatherApp {
 
             // we want to get the current hour's data
             // so we need to get the index of our current hour
-            JSONArray time = (JSONArray) hourly.get("time");
-            int index = findIndexOfCurrentTime(time);
+            JSONArray timeData = (JSONArray) hourly.get("time");
+            int index = findIndexOfCurrentTime(timeData);
+
+            // get time
+            String time = getCurrentTime();
+
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+            LocalDateTime dateTime = LocalDateTime.parse(time, inputFormatter);
+            String formattedDate = dateTime.format(outputFormatter);
+
 
             // get temperature
             JSONArray temperatureData = (JSONArray) hourly.get("temperature_2m");
@@ -87,6 +97,7 @@ public class WeatherApp {
             weatherData.put("weather_condition", weatherCondition);
             weatherData.put("humidity", humidity);
             weatherData.put("windspeed", windspeed);
+            weatherData.put("time", formattedDate);
 
             return weatherData;
         }catch(Exception e){
