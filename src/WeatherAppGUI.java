@@ -24,7 +24,7 @@ public class WeatherAppGUI extends JFrame {
     public WeatherAppGUI() {
         super("Weather App");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(450, 750); // Adjusted height to fit daily data
+        setSize(450, 750);
         setLocationRelativeTo(null);
         setLayout(null);
         setResizable(false);
@@ -71,12 +71,6 @@ public class WeatherAppGUI extends JFrame {
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(windspeedText);
 
-        JLabel dateText = new JLabel("<html><b>Date:</b> </html>");
-        dateText.setBounds(0, 70, 450, 80);
-        dateText.setFont(new Font("Dialog", Font.PLAIN, 20));
-        dateText.setHorizontalAlignment(SwingConstants.CENTER);
-        add(dateText);
-
         cityNameLabel = new JLabel("");
         cityNameLabel.setBounds(0, 70, 450, 30);
         cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 32));
@@ -86,7 +80,6 @@ public class WeatherAppGUI extends JFrame {
         JButton searchButton = new JButton(loadImage("src/assets/search.png"));
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchButton.setBounds(375, 13, 47, 45);
-
 
         ActionListener searchAction = new ActionListener() {
             @Override
@@ -102,28 +95,6 @@ public class WeatherAppGUI extends JFrame {
                     return;
                 }
 
-                weatherData = WeatherApp.getWeatherData(userInput);
-                if (weatherData == null) {
-                    cityNameLabel.setText("City not found");
-                    return;
-                }
-
-                String stateType = (String) weatherData.get("type");
-                String state = (String) weatherData.get("state");
-                String country = (String) weatherData.get("country");
-                cityNameLabel.setText(userInput + ", " + state + country);
-
-                if(stateType.equals("PPLC")) {
-                    cityNameLabel.setText(userInput + ", " + country);
-                }
-                else if(stateType.equals("PPL") || stateType.equals("PPLA") || stateType.equals("PPLA2") || stateType.equals("PPLA3")){
-                    cityNameLabel.setText(userInput + ", " + state);
-                }
-                else {
-                    cityNameLabel.setText(userInput);
-                }
-
-
                 cityNameLabel.setText(userInput);
 
                 JSONObject hourlyData = (JSONObject) weatherData.get("hourly");
@@ -137,24 +108,6 @@ public class WeatherAppGUI extends JFrame {
                     weatherConditionDesc.setText(weatherCondition);
                     humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
                     windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
-
-                    if (weatherCondition != null) {
-
-                        switch (weatherCondition) {
-                            case "Clear":
-                                weatherConditionImage.setIcon(loadImage("src/Assets/clear.png"));
-                                break;
-                            case "Cloudy":
-                                weatherConditionImage.setIcon(loadImage("src/Assets/cloudy.png"));
-                                break;
-                            case "Rain":
-                                weatherConditionImage.setIcon(loadImage("src/Assets/rain.png"));
-                                break;
-                            case "Snow":
-                                weatherConditionImage.setIcon(loadImage("src/Assets/snow.png"));
-                                break;
-                        }
-                    }
                 }
 
                 displayDailyWeather();
@@ -171,7 +124,11 @@ public class WeatherAppGUI extends JFrame {
         modeToggleButton.addActionListener(e -> toggleDarkMode());
         add(modeToggleButton);
 
-
+        JButton temperatureButton = new JButton("°F");
+        temperatureButton.setBounds(275, 350, 50, 50);
+        temperatureButton.setFont(new Font("Dialog", Font.PLAIN, 12));
+        temperatureButton.addActionListener(e -> toggleTemperatureUnit());
+        add(temperatureButton);
 
         dailyPanel = new JPanel();
         dailyPanel.setLayout(new GridLayout(0, 1));
@@ -223,7 +180,21 @@ public class WeatherAppGUI extends JFrame {
             String date = (String) dayData.get("date");
             double tempMax = (double) dayData.get("temperature_max");
             double tempMin = (double) dayData.get("temperature_min");
-            String weatherCondition = WeatherApp.convertWeatherCode((long) dayData.get("weather_code"));
+
+            Object weatherCodeObj = dayData.get("weather_code");
+            String weatherCondition;
+
+            if (weatherCodeObj instanceof String) {
+                // If weather_code is a descriptive string (e.g., "Clear")
+                weatherCondition = (String) weatherCodeObj;
+            } else if (weatherCodeObj instanceof Long) {
+                // If weather_code is numeric, convert it to a condition
+                long weatherCode = (Long) weatherCodeObj;
+                weatherCondition = WeatherApp.convertWeatherCode(weatherCode);
+            } else {
+                // Default to "Unknown" if the type is unexpected
+                weatherCondition = "Unknown";
+            }
 
             JLabel dailyLabel = new JLabel(date + ": " + weatherCondition + ", Max: " + tempMax + "°F, Min: " + tempMin + "°F");
             dailyPanel.add(dailyLabel);
@@ -232,6 +203,7 @@ public class WeatherAppGUI extends JFrame {
         dailyPanel.revalidate();
         dailyPanel.repaint();
     }
+
 
     private ImageIcon loadImage(String resourcePath) {
         try {

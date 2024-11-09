@@ -174,7 +174,7 @@ public class WeatherApp {
         return currentDateTime.format(formatter);
     }
 
-    protected static String convertWeatherCode(long weathercode) {
+    static String convertWeatherCode(long weathercode) {
         if (weathercode == 0L) return "Clear";
         if (weathercode <= 3L) return "Cloudy";
         if (weathercode >= 51L && weathercode <= 67L || weathercode >= 80L && weathercode <= 99L) return "Rain";
