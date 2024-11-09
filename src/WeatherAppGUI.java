@@ -1,3 +1,4 @@
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -11,18 +12,19 @@ import java.io.IOException;
 public class WeatherAppGUI extends JFrame {
     private JSONObject weatherData;
     private JLabel cityNameLabel;
+    private JPanel dailyPanel;
 
-    private boolean isDarkMode = false; // Track the current mode
+    private boolean isDarkMode = false;
     private Color lightBackground = Color.WHITE;
     private Color lightText = Color.BLACK;
     private Color darkBackground = Color.DARK_GRAY;
     private Color darkText = Color.LIGHT_GRAY;
-    private boolean isCelcius = false; // Celcius or Fahrenheit
+    private boolean isCelcius = false;
 
     public WeatherAppGUI() {
         super("Weather App");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(450, 650);
+        setSize(450, 750); // Adjusted height to fit daily data
         setLocationRelativeTo(null);
         setLayout(null);
         setResizable(false);
@@ -75,10 +77,9 @@ public class WeatherAppGUI extends JFrame {
         dateText.setHorizontalAlignment(SwingConstants.CENTER);
         add(dateText);
 
-        // Initialize the city name label and add it to the frame
         cityNameLabel = new JLabel("");
         cityNameLabel.setBounds(0, 70, 450, 30);
-        cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 24));
+        cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 32));
         cityNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(cityNameLabel);
 
@@ -86,12 +87,18 @@ public class WeatherAppGUI extends JFrame {
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchButton.setBounds(375, 13, 47, 45);
 
-        // Define the shared action listener
+
         ActionListener searchAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String userInput = searchTextField.getText().trim();
                 if (userInput.isEmpty()) {
+                    return;
+                }
+
+                weatherData = WeatherApp.getWeatherData(userInput);
+                if (weatherData == null) {
+                    cityNameLabel.setText("City not found");
                     return;
                 }
 
@@ -116,86 +123,69 @@ public class WeatherAppGUI extends JFrame {
                     cityNameLabel.setText(userInput);
                 }
 
-                String weatherCondition = (String) weatherData.get("weather_condition");
-                switch (weatherCondition) {
-                    case "Clear":
-                        weatherConditionImage.setIcon(loadImage("src/Assets/clear.png"));
-                        break;
-                    case "Cloudy":
-                        weatherConditionImage.setIcon(loadImage("src/Assets/cloudy.png"));
-                        break;
-                    case "Rain":
-                        weatherConditionImage.setIcon(loadImage("src/Assets/rain.png"));
-                        break;
-                    case "Snow":
-                        weatherConditionImage.setIcon(loadImage("src/Assets/snow.png"));
-                        break;
+
+                cityNameLabel.setText(userInput);
+
+                JSONObject hourlyData = (JSONObject) weatherData.get("hourly");
+                if (hourlyData != null) {
+                    double temperature = (double) hourlyData.get("temperature");
+                    String weatherCondition = (String) hourlyData.get("weather_condition");
+                    long humidity = (long) hourlyData.get("humidity");
+                    double windspeed = (double) hourlyData.get("windspeed");
+
+                    temperatureText.setText(temperature + " ");
+                    weatherConditionDesc.setText(weatherCondition);
+                    humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
+                    windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
+
+                    if (weatherCondition != null) {
+
+                        switch (weatherCondition) {
+                            case "Clear":
+                                weatherConditionImage.setIcon(loadImage("src/Assets/clear.png"));
+                                break;
+                            case "Cloudy":
+                                weatherConditionImage.setIcon(loadImage("src/Assets/cloudy.png"));
+                                break;
+                            case "Rain":
+                                weatherConditionImage.setIcon(loadImage("src/Assets/rain.png"));
+                                break;
+                            case "Snow":
+                                weatherConditionImage.setIcon(loadImage("src/Assets/snow.png"));
+                                break;
+                        }
+                    }
                 }
 
-                double temperature = (double) weatherData.get("temperature");
-                temperatureText.setText(temperature + " ");
-                weatherConditionDesc.setText(weatherCondition);
-
-                long humidity = (long) weatherData.get("humidity");
-                humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
-
-                double windspeed = (double) weatherData.get("windspeed");
-                windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
-
-                String date = (String) weatherData.get("time");
-                dateText.setText("<html><b>Date:</b> " + date + "</html>");
+                displayDailyWeather();
             }
         };
-        //Adds search functionality to button and by also hitting enter
         searchButton.addActionListener(searchAction);
         searchTextField.addActionListener(searchAction);
 
         add(searchButton);
 
-        // Add a toggle button for light/dark mode
         JButton modeToggleButton = new JButton("Dark Mode");
         modeToggleButton.setIcon(loadImage("src/Assets/moonv2.png"));
         modeToggleButton.setBounds(300, 580, 130, 30);
         modeToggleButton.addActionListener(e -> toggleDarkMode());
         add(modeToggleButton);
 
-        applyTheme(); // Set the initial theme based on isDarkMode
 
-        JButton temperatureButton = new JButton("°F");
-        temperatureButton.setBounds(275, 350, 50, 50);
-        temperatureButton.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-        ActionListener temperatureAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String userInput = searchTextField.getText().trim();
-                if (userInput.isEmpty()) {
-                    return;
-                }
+        dailyPanel = new JPanel();
+        dailyPanel.setLayout(new GridLayout(0, 1));
+        dailyPanel.setBounds(15, 600, 420, 120);
 
-                weatherData = WeatherApp.getWeatherData(userInput);
-                if (weatherData == null) {
-                    cityNameLabel.setText("City not found");
-                    return;
-                }
+        JScrollPane dailyScrollPane = new JScrollPane(dailyPanel);
+        dailyScrollPane.setBounds(15, 600, 420, 120);
+        add(dailyScrollPane);
 
-                isCelcius = !isCelcius; // Toggle the unit
-                double temperature = (double) weatherData.get("temperature");
+        applyTheme();
+    }
 
-                if (!isCelcius) {
-                    temperatureText.setText(temperature + " ");
-                    temperatureButton.setText("°F");
-                } else {
-                    // Convert to Celsius
-                    double temperatureInCelcius = (temperature - 32) * 5 / 9;
-                    temperatureText.setText(String.format("%.1f", temperatureInCelcius));
-                    temperatureButton.setText("°C");
-                }
-            }
-        };
-
-        temperatureButton.addActionListener(temperatureAction);
-        add(temperatureButton);
+    private void toggleTemperatureUnit() {
+        // Logic to toggle between Fahrenheit and Celsius
     }
 
     private void toggleDarkMode() {
@@ -207,7 +197,6 @@ public class WeatherAppGUI extends JFrame {
         Color backgroundColor = isDarkMode ? darkBackground : lightBackground;
         Color textColor = isDarkMode ? darkText : lightText;
 
-        // Update the background and text color for components
         getContentPane().setBackground(backgroundColor);
 
         for (Component comp : getContentPane().getComponents()) {
@@ -223,6 +212,27 @@ public class WeatherAppGUI extends JFrame {
         }
     }
 
+    private void displayDailyWeather() {
+        dailyPanel.removeAll();
+
+        JSONArray dailyData = (JSONArray) weatherData.get("daily");
+        if (dailyData == null) return;
+
+        for (Object dayObj : dailyData) {
+            JSONObject dayData = (JSONObject) dayObj;
+            String date = (String) dayData.get("date");
+            double tempMax = (double) dayData.get("temperature_max");
+            double tempMin = (double) dayData.get("temperature_min");
+            String weatherCondition = WeatherApp.convertWeatherCode((long) dayData.get("weather_code"));
+
+            JLabel dailyLabel = new JLabel(date + ": " + weatherCondition + ", Max: " + tempMax + "°F, Min: " + tempMin + "°F");
+            dailyPanel.add(dailyLabel);
+        }
+
+        dailyPanel.revalidate();
+        dailyPanel.repaint();
+    }
+
     private ImageIcon loadImage(String resourcePath) {
         try {
             BufferedImage image = ImageIO.read(new File(resourcePath));
@@ -230,7 +240,6 @@ public class WeatherAppGUI extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Could not find resource");
         return null;
     }
 }
