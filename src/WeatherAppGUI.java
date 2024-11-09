@@ -69,10 +69,16 @@ public class WeatherAppGUI extends JFrame {
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(windspeedText);
 
+        JLabel dateText = new JLabel("<html><b>Date:</b> </html>");
+        dateText.setBounds(0, 70, 450, 80);
+        dateText.setFont(new Font("Dialog", Font.PLAIN, 20));
+        dateText.setHorizontalAlignment(SwingConstants.CENTER);
+        add(dateText);
+
         // Initialize the city name label and add it to the frame
         cityNameLabel = new JLabel("");
         cityNameLabel.setBounds(0, 70, 450, 30);
-        cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 32));
+        cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 24));
         cityNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(cityNameLabel);
 
@@ -95,7 +101,20 @@ public class WeatherAppGUI extends JFrame {
                     return;
                 }
 
-                cityNameLabel.setText(userInput);
+                String stateType = (String) weatherData.get("type");
+                String state = (String) weatherData.get("state");
+                String country = (String) weatherData.get("country");
+                cityNameLabel.setText(userInput + ", " + state + country);
+
+                if(stateType.equals("PPLC")) {
+                    cityNameLabel.setText(userInput + ", " + country);
+                }
+                else if(stateType.equals("PPL") || stateType.equals("PPLA") || stateType.equals("PPLA2") || stateType.equals("PPLA3")){
+                    cityNameLabel.setText(userInput + ", " + state);
+                }
+                else {
+                    cityNameLabel.setText(userInput);
+                }
 
                 String weatherCondition = (String) weatherData.get("weather_condition");
                 switch (weatherCondition) {
@@ -122,6 +141,9 @@ public class WeatherAppGUI extends JFrame {
 
                 double windspeed = (double) weatherData.get("windspeed");
                 windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
+
+                String date = (String) weatherData.get("time");
+                dateText.setText("<html><b>Date:</b> " + date + "</html>");
             }
         };
         //Adds search functionality to button and by also hitting enter

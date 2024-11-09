@@ -22,6 +22,9 @@ public class WeatherApp {
         JSONObject location = (JSONObject) locationData.get(0);
         double latitude = (double) location.get("latitude");
         double longitude = (double) location.get("longitude");
+        String admin1 = (String) location.get("admin1");
+        String country = (String) location.get("country");
+        String fCode = (String) location.get("feature_code");
 
         // build API request URL with location coordinates
         String urlString = "https://api.open-meteo.com/v1/forecast?" +
@@ -62,8 +65,17 @@ public class WeatherApp {
 
             // we want to get the current hour's data
             // so we need to get the index of our current hour
-            JSONArray time = (JSONArray) hourly.get("time");
-            int index = findIndexOfCurrentTime(time);
+            JSONArray timeData = (JSONArray) hourly.get("time");
+            int index = findIndexOfCurrentTime(timeData);
+
+            // get time
+            String time = getCurrentTime();
+
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+            LocalDateTime dateTime = LocalDateTime.parse(time, inputFormatter);
+            String formattedDate = dateTime.format(outputFormatter);
 
             // get temperature
             JSONArray temperatureData = (JSONArray) hourly.get("temperature_2m");
@@ -87,6 +99,10 @@ public class WeatherApp {
             weatherData.put("weather_condition", weatherCondition);
             weatherData.put("humidity", humidity);
             weatherData.put("windspeed", windspeed);
+            weatherData.put("time", formattedDate);
+            weatherData.put("state", admin1);
+            weatherData.put("type", fCode);
+            weatherData.put("country", country);
 
             return weatherData;
         }catch(Exception e){
