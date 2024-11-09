@@ -22,6 +22,9 @@ public class WeatherApp {
         JSONObject location = (JSONObject) locationData.get(0);
         double latitude = (double) location.get("latitude");
         double longitude = (double) location.get("longitude");
+        String admin1 = (String) location.get("admin1");
+        String country = (String) location.get("country");
+        String fCode = (String) location.get("feature_code");
 
         // build API request URL with location coordinates
         String urlString = "https://api.open-meteo.com/v1/forecast?" +
@@ -74,7 +77,6 @@ public class WeatherApp {
             LocalDateTime dateTime = LocalDateTime.parse(time, inputFormatter);
             String formattedDate = dateTime.format(outputFormatter);
 
-
             // get temperature
             JSONArray temperatureData = (JSONArray) hourly.get("temperature_2m");
             double temperature = (double) temperatureData.get(index);
@@ -98,6 +100,9 @@ public class WeatherApp {
             weatherData.put("humidity", humidity);
             weatherData.put("windspeed", windspeed);
             weatherData.put("time", formattedDate);
+            weatherData.put("state", admin1);
+            weatherData.put("type", fCode);
+            weatherData.put("country", country);
 
             return weatherData;
         }catch(Exception e){
