@@ -22,6 +22,7 @@ public class WeatherApp {
 
         // Extract latitude, longitude, state, and country data
         JSONObject location = (JSONObject) locationData.get(0);
+        String name = (String) location.get("name");
         double latitude = (double) location.get("latitude");
         double longitude = (double) location.get("longitude");
         String state = (String) location.get("admin1");
@@ -108,6 +109,7 @@ public class WeatherApp {
             weatherData.put("state", state);
             weatherData.put("country", country);
             weatherData.put("type", stateType);
+            weatherData.put("name", name);
             weatherData.put("hourly", hourlyWeatherData);
             weatherData.put("daily", dailyWeatherArray);
 

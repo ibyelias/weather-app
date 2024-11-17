@@ -147,19 +147,19 @@ public class WeatherAppGUI extends JFrame {
             return;
         }
 
+        String name = (String) weatherData.get("name");
         String stateType = (String) weatherData.get("type");
         String state = (String) weatherData.get("state");
         String country = (String) weatherData.get("country");
-        String postcode = (String) weatherData.get("postcode");
 
         if(stateType.equals("PPLC")) {
-            cityNameLabel.setText(userInput + ", " + country);
+            cityNameLabel.setText(name + ", " + country);
         }
         else if(stateType.equals("PPL") || stateType.equals("PPLA") || stateType.equals("PPLA2") || stateType.equals("PPLA3")){
-            cityNameLabel.setText(userInput + ", " + state);
+            cityNameLabel.setText(name + ", " + state);
         }
         else {
-            cityNameLabel.setText(userInput);
+            cityNameLabel.setText(name);
         }
 
         JSONObject hourlyData = (JSONObject) weatherData.get("hourly");
