@@ -13,6 +13,7 @@ public class WeatherAppGUI extends JFrame {
     private JSONObject weatherData;
     private JLabel cityNameLabel;
     private JLabel temperatureText;
+    private JButton temperatureButton;
     private JLabel windspeedText;
     private JLabel humidityText;
     private JLabel weatherConditionDesc;
@@ -110,7 +111,7 @@ public class WeatherAppGUI extends JFrame {
         centerPanel.add(modeToggleButton, gbc);
 
         // Temperature unit toggle button
-        JButton temperatureButton = new JButton("°F");
+        temperatureButton = new JButton("°F");
         temperatureButton.setFont(new Font("Dialog", Font.PLAIN, 12));
         temperatureButton.addActionListener(e -> toggleTemperatureUnit());
         gbc.gridy = 6;
@@ -149,6 +150,7 @@ public class WeatherAppGUI extends JFrame {
         String stateType = (String) weatherData.get("type");
         String state = (String) weatherData.get("state");
         String country = (String) weatherData.get("country");
+        String postcode = (String) weatherData.get("postcode");
 
         if(stateType.equals("PPLC")) {
             cityNameLabel.setText(userInput + ", " + country);
@@ -167,7 +169,9 @@ public class WeatherAppGUI extends JFrame {
             long humidity = (long) hourlyData.get("humidity");
             double windspeed = (double) hourlyData.get("windspeed");
 
-            temperatureText.setText(temperature + "°");
+            isMetric = false;
+            temperatureText.setText(temperature + "°F");
+            temperatureButton.setText("°F");
             humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
             windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
 
@@ -218,6 +222,7 @@ public class WeatherAppGUI extends JFrame {
 
             // Update the temperature label with the converted value and the new unit
             temperatureText.setText(String.format("%.1f", temp) + unit);
+            temperatureButton.setText(unit);
             windspeedText.setText(String.format("%.1f", windspeed) + windspeedUnit);
         } catch (NumberFormatException e) {
             e.printStackTrace();
