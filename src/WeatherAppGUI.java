@@ -17,7 +17,6 @@ public class WeatherAppGUI extends JFrame {
     private JSONObject weatherData;
     private JLabel cityNameLabel;
     private JLabel temperatureText;
-    private JButton temperatureButton;
     private JLabel windspeedText;
     private JLabel humidityText;
     private JLabel weatherConditionDesc;
@@ -43,8 +42,36 @@ public class WeatherAppGUI extends JFrame {
     }
 
     private void addGuiComponents() {
+        // Create the menu bar
+        JMenuBar menuBar = new JMenuBar();
+
+        // Create the Settings menu
+        JMenu settingsMenu = new JMenu("Settings");
+
+        // Dark Mode toggle menu item
+        JCheckBoxMenuItem darkModeItem = new JCheckBoxMenuItem("Dark Mode");
+        darkModeItem.setState(isDarkMode); // Reflect current mode
+        darkModeItem.addActionListener(e -> {
+            toggleDarkMode();
+            darkModeItem.setState(isDarkMode); // Update state
+        });
+        settingsMenu.add(darkModeItem);
+
+        // Temperature Unit toggle menu item
+        JCheckBoxMenuItem tempUnitItem = new JCheckBoxMenuItem("Use Metric (°C)");
+        tempUnitItem.setState(isMetric); // Reflect current unit
+        tempUnitItem.addActionListener(e -> {
+            toggleTemperatureUnit();
+            tempUnitItem.setState(isMetric); // Update state
+        });
+        settingsMenu.add(tempUnitItem);
+
+        // Add the Settings menu to the menu bar
+        menuBar.add(settingsMenu);
+        setJMenuBar(menuBar);
+
+        // Top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel centerPanel = new JPanel(new GridBagLayout());  // Use GridBagLayout for centering components
 
         JTextField searchTextField = new JTextField(20);
         searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
@@ -54,43 +81,39 @@ public class WeatherAppGUI extends JFrame {
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         topPanel.add(searchButton, BorderLayout.EAST);
 
-        // Constraints for GridBagLayout
+        // Center Panel
+        JPanel centerPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);  // Add padding around components
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.gridx = 0;
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        // City name label
         cityNameLabel = new JLabel("");
         cityNameLabel.setFont(new Font("Dialog", Font.BOLD, 32));
         cityNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 0;
         centerPanel.add(cityNameLabel, gbc);
 
-        // Weather icon
         weatherConditionImage = new JLabel(loadImage("src/assets/cloudy.png"));
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
         centerPanel.add(weatherConditionImage, gbc);
 
-        // Temperature text
         temperatureText = new JLabel("Please Enter a City or Postal Code.");
         temperatureText.setFont(new Font("Dialog", Font.BOLD, 48));
         temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 2;
         centerPanel.add(temperatureText, gbc);
 
-        // Weather description
         weatherConditionDesc = new JLabel(" ");
         weatherConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
         weatherConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 3;
         centerPanel.add(weatherConditionDesc, gbc);
 
-        // Details panel for humidity and windspeed
         JPanel detailsPanel = new JPanel(new FlowLayout());
         detailsPanel.add(new JLabel(loadImage("src/assets/humidityv3.png")));
         humidityText = new JLabel("<html><b>Humidity</b> </html>");
@@ -106,30 +129,13 @@ public class WeatherAppGUI extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         centerPanel.add(detailsPanel, gbc);
 
-        // Dark mode toggle button
-        JButton modeToggleButton = new JButton("Dark Mode");
-        modeToggleButton.setIcon(loadImage("src/assets/moonv2.png"));
-        modeToggleButton.addActionListener(e -> toggleDarkMode());
-        modeToggleButton.setPreferredSize((new Dimension(5,50)));
-        gbc.gridy = 5;
-        centerPanel.add(modeToggleButton, gbc);
-
-        // Temperature unit toggle button
-        temperatureButton = new JButton("°F");
-        temperatureButton.setFont(new Font("Dialog", Font.PLAIN, 12));
-        temperatureButton.addActionListener(e -> toggleTemperatureUnit());
-        gbc.gridy = 6;
-        centerPanel.add(temperatureButton, gbc);
-
-        // Daily weather panel with scroll pane
         dailyPanel = new JPanel();
-        dailyPanel.setLayout(new GridLayout(0, 7, 10, 10)); // 7 columns for each day of the week
-
+        dailyPanel.setLayout(new GridLayout(0, 7, 10, 10));
         JScrollPane dailyScrollPane = new JScrollPane(dailyPanel);
-        dailyPanel.setPreferredSize(new Dimension(700, 150));
-        gbc.gridy = 7;
+        dailyPanel.setPreferredSize(new Dimension(700, 175));
+        gbc.gridy = 5;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 5; // Make the daily forecast area expand
+        gbc.weighty = 5;
         centerPanel.add(dailyScrollPane, gbc);
 
         searchButton.addActionListener(e -> searchWeather(searchTextField));
@@ -137,7 +143,6 @@ public class WeatherAppGUI extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
-        applyTheme();
     }
 
     private void searchWeather(JTextField searchTextField) {
@@ -176,7 +181,6 @@ public class WeatherAppGUI extends JFrame {
 
             isMetric = false;
             temperatureText.setText(temperature + "°F");
-            temperatureButton.setText("°F");
             humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
             windspeedText.setText("<html><b>Windspeed</b> " + windspeed + "mph</html>");
 
@@ -227,7 +231,6 @@ public class WeatherAppGUI extends JFrame {
 
             // Update the temperature label with the converted value and the new unit
             temperatureText.setText(String.format("%.1f", temp) + unit);
-            temperatureButton.setText(unit);
             windspeedText.setText(String.format("%.1f", windspeed) + windspeedUnit);
         } catch (NumberFormatException e) {
             e.printStackTrace();
