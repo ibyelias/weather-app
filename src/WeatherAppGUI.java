@@ -8,6 +8,10 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 public class WeatherAppGUI extends JFrame {
     private JSONObject weatherData;
@@ -30,12 +34,12 @@ public class WeatherAppGUI extends JFrame {
     public WeatherAppGUI() {
         super("Weather App");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(450, 750);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setResizable(true);
         addGuiComponents();
         applyTheme();
+        pack();
     }
 
     private void addGuiComponents() {
@@ -73,14 +77,14 @@ public class WeatherAppGUI extends JFrame {
         centerPanel.add(weatherConditionImage, gbc);
 
         // Temperature text
-        temperatureText = new JLabel("10");
+        temperatureText = new JLabel("Please Enter a City or Postal Code.");
         temperatureText.setFont(new Font("Dialog", Font.BOLD, 48));
         temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 2;
         centerPanel.add(temperatureText, gbc);
 
         // Weather description
-        weatherConditionDesc = new JLabel("Cloudy");
+        weatherConditionDesc = new JLabel(" ");
         weatherConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
         weatherConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 3;
@@ -89,12 +93,12 @@ public class WeatherAppGUI extends JFrame {
         // Details panel for humidity and windspeed
         JPanel detailsPanel = new JPanel(new FlowLayout());
         detailsPanel.add(new JLabel(loadImage("src/assets/humidityv3.png")));
-        humidityText = new JLabel("<html><b>Humidity</b> 100%</html>");
+        humidityText = new JLabel("<html><b>Humidity</b> </html>");
         humidityText.setFont(new Font("Dialog", Font.PLAIN, 16));
         detailsPanel.add(humidityText);
 
         detailsPanel.add(new JLabel(loadImage("src/assets/windspeedv3.png")));
-        windspeedText = new JLabel("<html><b>Windspeed</b> 15mph</html>");
+        windspeedText = new JLabel("<html><b>Windspeed</b> </html>");
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         detailsPanel.add(windspeedText);
 
@@ -122,6 +126,7 @@ public class WeatherAppGUI extends JFrame {
         dailyPanel.setLayout(new GridLayout(0, 7, 10, 10)); // 7 columns for each day of the week
 
         JScrollPane dailyScrollPane = new JScrollPane(dailyPanel);
+        dailyPanel.setPreferredSize(new Dimension(700, 150));
         gbc.gridy = 7;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 5; // Make the daily forecast area expand
@@ -256,26 +261,81 @@ public class WeatherAppGUI extends JFrame {
         }
     }
 
+    private ImageIcon getWeatherIcon(String weatherCondition, int width, int height) {
+        String iconPath;
+        switch (weatherCondition.toLowerCase()) {
+            case "clear":
+                iconPath = "src/assets/clear.png";
+                break;
+            case "cloudy":
+                iconPath = "src/assets/cloudy.png";
+                break;
+            case "rain":
+                iconPath = "src/assets/rain.png";
+                break;
+            case "snow":
+                iconPath = "src/assets/snow.png";
+                break;
+            default:
+                iconPath = "src/assets/clear.png";
+                break;
+        }
+        return resizeIcon(loadImage(iconPath), width, height);
+    }
+
+    // Helper method to resize icons
+    private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
+        if (icon == null) return null;
+        Image img = icon.getImage();
+        Image resizedImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(resizedImg);
+    }
+
+
     private void displayDailyWeather() {
         dailyPanel.removeAll();
 
         JSONArray dailyData = (JSONArray) weatherData.get("daily");
         if (dailyData == null) return;
 
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Adjust based on input format
+        DateTimeFormatter monthDayFormatter = DateTimeFormatter.ofPattern("MMM d"); // For Dec 1
+
         for (Object dayObj : dailyData) {
             JSONObject dayData = (JSONObject) dayObj;
             String date = (String) dayData.get("date");
+            String weatherCondition = (String) dayData.get("weather_code");
             double tempMax = (double) dayData.get("temperature_max");
             double tempMin = (double) dayData.get("temperature_min");
 
+            // Parse and format the date
+            LocalDate parsedDate = LocalDate.parse(date, inputFormatter);
+            String formattedDate = monthDayFormatter.format(parsedDate);
+            formattedDate += getOrdinalSuffix(parsedDate.getDayOfMonth()); // Add ordinal suffix
+            String dayOfWeek = parsedDate.getDayOfWeek()
+                    .getDisplayName(TextStyle.FULL, Locale.ENGLISH); // Get day name
+
+            // Create a panel for each day's weather
             JPanel dayPanel = new JPanel();
             dayPanel.setLayout(new BoxLayout(dayPanel, BoxLayout.Y_AXIS));
             dayPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-            JLabel dateLabel = new JLabel(date);
+            // Add date and day labels
+            JLabel dateLabel = new JLabel(formattedDate);
             dateLabel.setHorizontalAlignment(SwingConstants.CENTER);
             dayPanel.add(dateLabel);
 
+            JLabel dayOfWeekLabel = new JLabel(dayOfWeek);
+            dayOfWeekLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            dayPanel.add(dayOfWeekLabel);
+
+            // Add weather icon
+            ImageIcon weatherIcon = getWeatherIcon(weatherCondition, 50, 50); // Resize to fit panel
+            JLabel iconLabel = new JLabel(weatherIcon);
+            iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            dayPanel.add(iconLabel);
+
+            // Add temperature labels
             JLabel maxTempLabel;
             JLabel minTempLabel;
 
@@ -299,6 +359,17 @@ public class WeatherAppGUI extends JFrame {
         dailyPanel.revalidate();
         dailyPanel.repaint();
         applyTheme();
+    }
+
+    // Helper method to get ordinal suffix for the day
+    private String getOrdinalSuffix(int day) {
+        if (day >= 11 && day <= 13) return "th"; // Handle special cases
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
     }
 
     private ImageIcon loadImage(String resourcePath) {
