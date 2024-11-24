@@ -77,7 +77,7 @@ public class WeatherAppGUI extends JFrame {
         searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
         topPanel.add(searchTextField, BorderLayout.CENTER);
 
-        JButton searchButton = new JButton(loadImage("src/assets/search.png"));
+        JButton searchButton = new JButton(loadImage("src/assets/searchv2.png"));
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         topPanel.add(searchButton, BorderLayout.EAST);
 
@@ -357,6 +357,7 @@ public class WeatherAppGUI extends JFrame {
             dayPanel.add(minTempLabel);
 
             dailyPanel.add(dayPanel);
+            pack();
         }
 
         dailyPanel.revalidate();
