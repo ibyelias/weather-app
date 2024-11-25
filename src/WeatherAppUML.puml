@@ -1,0 +1,48 @@
+@startuml
+package "WeatherApp Application" {
+    class WeatherAppGUI {
+        - JSONObject weatherData
+        - JLabel cityNameLabel
+        - JLabel temperatureText
+        - JLabel weatherConditionDesc
+        - JLabel weatherConditionImage
+        - JPanel dailyPanel
+        - boolean isDarkMode
+        - Color lightBackground
+        - Color lightText
+        - Color darkBackground
+        - Color darkText
+        - boolean isCelcius
+        + WeatherAppGUI()
+        - void addGuiComponents()
+        - void searchWeather(JTextField searchField)
+        - void updateWeatherIcon(String weatherCondition)
+        - void toggleTemperatureUnit()
+        - void toggleDarkMode()
+        - void applyTheme()
+        - void applyThemeToComponents(Container component, Color bgColor, Color textColor)
+        - void displayDailyWeather()
+        - ImageIcon loadImage(String imagePath)
+    }
+
+    class WeatherApp {
+        + static JSONObject getWeatherData(String locationName)
+        + static JSONArray getLocationData(String locationName)
+        - static HttpURLConnection fetchApiResponse(String urlString)
+        - static int findIndexOfCurrentTime(JSONArray timeList)
+        - static String getCurrentTime()
+        + static String convertWeatherCode(long weatherCode)
+    }
+
+    class AppLauncher {
+        + static void main(String[] args)
+    }
+
+    JFrame <|-- WeatherAppGUI
+    AppLauncher --> WeatherAppGUI : invokes
+    AppLauncher --> WeatherApp : accesses
+    WeatherAppGUI --> WeatherApp : accesses
+
+}
+
+@enduml
