@@ -24,7 +24,7 @@ public class WeatherAppGUI extends JFrame {
     private JPanel dailyPanel;
 
     private boolean isDarkMode = false;
-    private Color lightBackground = Color.WHITE;
+    private Color lightBackground = new Color(227, 248, 250);
     private Color lightText = Color.BLACK;
     private Color darkBackground = Color.DARK_GRAY;
     private Color darkText = Color.LIGHT_GRAY;
@@ -77,7 +77,7 @@ public class WeatherAppGUI extends JFrame {
         searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
         topPanel.add(searchTextField, BorderLayout.CENTER);
 
-        JButton searchButton = new JButton(loadImage("src/assets/searchv2.png"));
+        JButton searchButton = new JButton(loadImage("src/assets/searchv4.png"));
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         topPanel.add(searchButton, BorderLayout.EAST);
 
