@@ -9,9 +9,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-// Retrieves weather data from API for display in the GUI
+/**
+ * Retrieves weather data from API for display in the GUI.
+ *
+ * @author Michael Broughton & Ibrahim Elias
+ * @version 1.0
+ */
 public class WeatherApp {
-    // Fetches weather data for a given location
+    /**
+     * Fetches weather data for a given location.
+     *
+     * @param locationName the location to fetch the weather data for
+     * @return the weather data as a JSONObject, or null if no data is available
+     */
     public static JSONObject getWeatherData(String locationName) {
         // Get location coordinates using the geolocation API
         JSONArray locationData = getLocationData(locationName);
@@ -120,7 +130,12 @@ public class WeatherApp {
         return null;
     }
 
-    // Retrieves geographic coordinates for a given location name
+    /**
+     * Retrieves location data for a given location name.
+     *
+     * @param locationName the location name to retrieve data for
+     * @return a JSONArray of location data, or null if no data is available
+     */
     public static JSONArray getLocationData(String locationName) {
         locationName = locationName.replaceAll(" ", "+");
         String urlString = "https://geocoding-api.open-meteo.com/v1/search?name=" +
@@ -150,6 +165,13 @@ public class WeatherApp {
         return null;
     }
 
+    /**
+     * Sends a GET request to the API and returns the response.
+     *
+     * @param urlString the URL of the API endpoint to call
+     * @return the HttpURLConnection object representing the API response
+     * @throws IOException if an error occurs while sending the request
+     */
     private static HttpURLConnection fetchApiResponse(String urlString) {
         try {
             URL url = new URL(urlString);
@@ -162,7 +184,12 @@ public class WeatherApp {
         }
         return null;
     }
-
+    /**
+     * Finds the index of the current time in the hourly weather data.
+     *
+     * @param timeList the hourly weather data to search
+     * @return the index of the current time, or -1 if not found
+     */
     private static int findIndexOfCurrentTime(JSONArray timeList) {
         String currentTime = getCurrentTime();
         for (int i = 0; i < timeList.size(); i++) {
@@ -172,13 +199,22 @@ public class WeatherApp {
         }
         return 0;
     }
-
+    /**
+     * Gets the current time in the format "HH:mm".
+     *
+     * @return the current time as a string
+     */
     private static String getCurrentTime() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH':00'");
         return currentDateTime.format(formatter);
     }
-
+    /**
+     * Converts a weather code to a human-readable description.
+     *
+     * @param weathercode the weather code to convert
+     * @return the human-readable description of the weather code
+     */
     static String convertWeatherCode(long weathercode) {
         if (weathercode == 0L) return "Clear";
         if (weathercode <= 3L) return "Cloudy";

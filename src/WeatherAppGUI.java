@@ -13,6 +13,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
+/**
+ * The main GUI for the Weather App.
+ * This class is responsible for displaying the weather data and handling user interactions.
+ * It communicates with the {@link WeatherApp} class to fetch and display the weather data.
+ *
+ * @author Michael Broughton & Ibrahim Elias
+ * @version 1.0
+ */
 public class WeatherAppGUI extends JFrame {
     private JSONObject weatherData;
     private JLabel cityNameLabel;
@@ -41,6 +49,9 @@ public class WeatherAppGUI extends JFrame {
         pack();
     }
 
+    /**
+     * Initializes the GUI components.
+     */
     private void addGuiComponents() {
         // Create the menu bar
         JMenuBar menuBar = new JMenuBar();
@@ -145,6 +156,11 @@ public class WeatherAppGUI extends JFrame {
         add(centerPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * Searches for the weather data based on the provided search text.
+     *
+     * @param searchTextField the text field containing the city name or zip code
+     */
     private void searchWeather(JTextField searchTextField) {
         String userInput = searchTextField.getText().trim();
         if (userInput.isEmpty()) {
@@ -191,6 +207,11 @@ public class WeatherAppGUI extends JFrame {
         displayDailyWeather();
     }
 
+    /**
+     * Updates the weather icon based on the provided weather condition.
+     *
+     * @param weatherCondition the weather condition to update the icon for
+     */
     private void updateWeatherIcon(String weatherCondition) {
         String iconPath;
         switch (weatherCondition.toLowerCase()) {
@@ -213,6 +234,9 @@ public class WeatherAppGUI extends JFrame {
         weatherConditionImage.setIcon(loadImage(iconPath));
     }
 
+    /**
+     * Toggles between Fahrenheit and Celsius temperature units.
+     */
     private void toggleTemperatureUnit() {
         isMetric = !isMetric;
         String currentText = temperatureText.getText();
@@ -240,11 +264,17 @@ public class WeatherAppGUI extends JFrame {
         displayDailyWeather();
     }
 
+    /**
+     * Toggles between light and dark mode themes.
+     */
     private void toggleDarkMode() {
         isDarkMode = !isDarkMode;
         applyTheme();
     }
 
+    /**
+     * Applies the current theme to all components in the GUI.
+     */
     private void applyTheme() {
         Color backgroundColor = isDarkMode ? darkBackground : lightBackground;
         Color textColor = isDarkMode ? darkText : lightText;
@@ -253,6 +283,13 @@ public class WeatherAppGUI extends JFrame {
         applyThemeToComponents(getContentPane(), backgroundColor, textColor);
     }
 
+    /**
+     * Applies the theme to the specified container and its components.
+     *
+     * @param container the container to apply the theme to
+     * @param backgroundColor the background color to use
+     * @param textColor the text color to use
+     */
     private void applyThemeToComponents(Container container, Color backgroundColor, Color textColor) {
         for (Component comp : container.getComponents()) {
             comp.setBackground(backgroundColor);
@@ -264,6 +301,14 @@ public class WeatherAppGUI extends JFrame {
         }
     }
 
+    /**
+     * Retrieves the weather icon for the specified weather condition.
+     *
+     * @param weatherCondition the weather condition to get the icon for
+     * @param width the desired width of the icon
+     * @param height the desired height of the icon
+     * @return the weather icon
+     */
     private ImageIcon getWeatherIcon(String weatherCondition, int width, int height) {
         String iconPath;
         switch (weatherCondition.toLowerCase()) {
@@ -287,6 +332,14 @@ public class WeatherAppGUI extends JFrame {
     }
 
     // Helper method to resize icons
+    /**
+     * Resizes an icon to the specified width and height.
+     *
+     * @param icon the icon to resize
+     * @param width the desired width
+     * @param height the desired height
+     * @return the resized icon
+     */
     private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
         if (icon == null) return null;
         Image img = icon.getImage();
@@ -295,6 +348,9 @@ public class WeatherAppGUI extends JFrame {
     }
 
 
+    /**
+     * Displays the daily weather forecast.
+     */
     private void displayDailyWeather() {
         dailyPanel.removeAll();
 
@@ -366,6 +422,12 @@ public class WeatherAppGUI extends JFrame {
     }
 
     // Helper method to get ordinal suffix for the day
+    /**
+     * Retrieves the ordinal suffix for the specified day.
+     *
+     * @param day the day to get the ordinal suffix for
+     * @return the ordinal suffix
+     */
     private String getOrdinalSuffix(int day) {
         if (day >= 11 && day <= 13) return "th"; // Handle special cases
         switch (day % 10) {
@@ -376,6 +438,12 @@ public class WeatherAppGUI extends JFrame {
         }
     }
 
+    /**
+     * Loads an image from the specified resource path.
+     *
+     * @param resourcePath the path to the image resource
+     * @return the loaded image
+     */
     private ImageIcon loadImage(String resourcePath) {
         try {
             BufferedImage image = ImageIO.read(new File(resourcePath));
